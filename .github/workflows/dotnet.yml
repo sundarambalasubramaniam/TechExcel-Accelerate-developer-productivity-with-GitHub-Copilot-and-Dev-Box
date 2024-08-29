@@ -1,40 +1,82 @@
-name: Azure Bicep-Advanced
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+env:
+  registryName: auro6etgxpbtgmpnpreg.azurecr.io
+  repositoryName: techexcel/dotnetcoreapp
+  dockerFolderPath: ./src/Application/src/RazorPagesTestSample
+  tag: ${{github.run_number}}
 
 on:
-  workflow_dispatch:
-   inputs:
-    appenv:
-      type: choice
-      description: Choose the target environment
-      options: 
-        - dev
-        - test
-        - prod
+  push:
+    branches: [ "main" ]
+    paths: src/Application/**
+  pull_request:
+    branches: [ "main" ]
+    paths: src/Application/**
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+
     steps:
-    # Checkout code
-    - uses: actions/checkout@main
-
-      # Log into Azure
-    - uses: azure/login@v2.1.1
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        enable-AzPSSession: true
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore ./src/Application/src/RazorPagesTestSample/RazorPagesTestSample.csproj
+    - name: Build
+      run: dotnet build --no-restore ./src/Application/src/RazorPagesTestSample/RazorPagesTestSample.csproj
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ./src/Application/src/RazorPagesTestSample/RazorPagesTestSample.csproj
 
-      # Deploy ARM template
-    - name: Run ARM deploy
-      uses: azure/arm-deploy@v1
+  dockerBuildPush:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Docker Login
+      # You may pin to the exact commit or the version.
+      # uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+      uses: docker/login-action@v1.9.0
       with:
-        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        resourceGroupName: ${{ secrets.AZURE_RG }}
-        template: ./src/InfrastructureAsCode/main.bicep
-        parameters: environment=${{ github.event.inputs.appenv }}
+        # Server address of Docker registry. If not set then will default to Docker Hub
+        registry: ${{ secrets.ACR_LOGIN_SERVER }}
+        # Username used to log against the Docker registry
+        username: ${{ secrets.ACR_USERNAME }}
+        # Password or personal access token used to log against the Docker registry
+        password: ${{ secrets.ACR_PASSWORD }}
+        # Log out from the Docker registry at the end of a job
+        logout: true
+        
+    - name: Docker Build
+      run: docker build -t $registryName/$repositoryName:$tag --build-arg build_version=$tag $dockerFolderPath
+      
+    - name: Docker Push
+      run: docker push $registryName/$repositoryName:$tag
+
+  deploy-to-dev:
+
+    runs-on: ubuntu-latest
+    needs: dockerBuildPush
+    environment:
+      name: dev
+      url: https://auro6etgxpbtg-dev.azurewebsites.net/
+    
+    steps:
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v2.1.1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'auro6etgxpbtg-dev'
+          images: auro6etgxpbtgmpnpreg.azurecr.io/techexcel/dotnetcoreapp:${{github.run_number}}
