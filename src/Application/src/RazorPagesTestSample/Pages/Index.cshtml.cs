@@ -17,10 +17,12 @@ namespace RazorPagesTestSample.Pages
         public IndexModel(AppDbContext db)
         {
             _db = db;
-        [BindProperty]
-        public Message Message { get; set; }
+        }
 
-        public List<Message> Messages { get; private set; }
+        [BindProperty]
+        public RazorPagesTestSample.Data.Message Message { get; set; }
+
+        public List<RazorPagesTestSample.Data.Message> Messages { get; private set; }
 
         [TempData]
         public string MessageAnalysisResult { get; set; }
