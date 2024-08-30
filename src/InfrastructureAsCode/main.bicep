@@ -76,7 +76,7 @@ resource appServiceApp 'Microsoft.Web/sites@2020-12-01' = {
       appCommandLine: startupCommand
       appSettings: [
         {
-          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'az ad sp create-for-rbac --name "TechExcelDotNetDeploy" --json-auth --role contributor --scopes /subscriptions/68053abd-6125-4b1e-86d1-baa72d3672ca
+          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
           value: 'false'
         }
         {
