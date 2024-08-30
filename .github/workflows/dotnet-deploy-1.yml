@@ -1,4 +1,4 @@
-name: .NET CI
+name: .NET CI Web App Deploy - dotnet-deploy-1.yml
 
 on:
   push:

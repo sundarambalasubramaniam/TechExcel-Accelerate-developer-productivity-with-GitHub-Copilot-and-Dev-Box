@@ -1,4 +1,4 @@
-name: Azure Bicep
+name: Azure Bicep Infra Deploy - deploy.yml
 
 on:
   workflow_dispatch
