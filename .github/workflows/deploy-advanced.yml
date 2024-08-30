@@ -9,8 +9,8 @@ on:
           - test
           - prod
   
-  name: Azure Bicep-Advanced
-  jobs:
+name: Azure Bicep-Advanced
+jobs:
     build-and-deploy:
       runs-on: ubuntu-latest
       permissions:
