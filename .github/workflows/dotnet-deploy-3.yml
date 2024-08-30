@@ -1,4 +1,4 @@
-name: .NET CI Web App Deploy - dotnet-deploy-3.yml
+name: CI-WebAppDeploy-dotnet-deploy-3.yml
 
 env:
   registryName: igozvcccdbrtampnpreg.azurecr.io
