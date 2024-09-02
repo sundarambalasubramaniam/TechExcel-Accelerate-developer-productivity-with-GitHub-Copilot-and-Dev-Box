@@ -1,4 +1,21 @@
-# CODEOWNERS file
-# This file designates code owners for specific directories
+# This is a CODEOWNERS file.
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
 
-/src/Application/  sundarambalasubramaniam
+
+
+#There owners will be the default owners for everything in the repo.
+# Unless a later match takes precedence.
+# *       @global-owner1 @global-owner2
+# We are the owners of the /docs/ directory
+*       @sundarambalasubramaniam
+
+#order of precedence is from top to bottom
+#order is important; the last match is the most precedence
+#owners will be requested for review when pull requests touch any part of the /src/ directory
+
+
+# The owner for the /src/Application/ directory
+/src/Application/ @sundarambalasubramaniam
+
+
